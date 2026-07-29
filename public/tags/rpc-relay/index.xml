@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>RPC Relay on IamWin&#39;s Blog</title>
+    <link>//localhost:1313/tags/rpc-relay/</link>
+    <description>Recent content in RPC Relay on IamWin&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 28 Jun 2026 21:30:00 -0500</lastBuildDate>
+    <atom:link href="//localhost:1313/tags/rpc-relay/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)</title>
+      <link>//localhost:1313/posts/esc11/</link>
+      <pubDate>Sun, 28 Jun 2026 21:30:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/esc11/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;ESC11&lt;/strong&gt; is a vulnerability in &lt;strong&gt;Active Directory Certificate Services (ADCS)&lt;/strong&gt; that occurs when the RPC interface of the Certificate Authority (CA) — specifically the &lt;strong&gt;ICertPassage (MS-ICPR)&lt;/strong&gt; interface — does not enforce signing or encryption for certificate enrollment requests. This happens because the &lt;code&gt;IF_ENFORCEENCRYPTICERTREQUEST&lt;/code&gt; flag is disabled on the CA.&lt;/p&gt;
+&lt;p&gt;Since no packet signing or encryption is required on this RPC interface, it becomes vulnerable to &lt;strong&gt;NTLM Relay&lt;/strong&gt; attacks. If an attacker manages to coerce the NTLM authentication of a privileged account (such as the machine account of a Domain Controller or a Domain Admin), they can relay that authentication to the CA&amp;rsquo;s RPC port and request a valid certificate on behalf of the victim.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

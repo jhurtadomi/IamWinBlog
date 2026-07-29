@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tags on IamWin&#39;s Blog</title>
+    <link>//localhost:1313/tags/</link>
+    <description>Recent content in Tags on IamWin&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 26 Jul 2026 11:30:00 -0500</lastBuildDate>
+    <atom:link href="//localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Credential Dumping</title>
+      <link>//localhost:1313/tags/credential-dumping/</link>
+      <pubDate>Sun, 26 Jul 2026 11:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/credential-dumping/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Evasion</title>
+      <link>//localhost:1313/tags/evasion/</link>
+      <pubDate>Sun, 26 Jul 2026 11:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/evasion/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>LSASS</title>
+      <link>//localhost:1313/tags/lsass/</link>
+      <pubDate>Sun, 26 Jul 2026 11:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/lsass/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Red Team</title>
+      <link>//localhost:1313/tags/red-team/</link>
+      <pubDate>Sun, 26 Jul 2026 11:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/red-team/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Windows Security</title>
+      <link>//localhost:1313/tags/windows-security/</link>
+      <pubDate>Sun, 26 Jul 2026 11:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/windows-security/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Active Directory</title>
+      <link>//localhost:1313/tags/active-directory/</link>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/active-directory/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>AI</title>
+      <link>//localhost:1313/tags/ai/</link>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/ai/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>BloodHound</title>
+      <link>//localhost:1313/tags/bloodhound/</link>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/bloodhound/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Claude</title>
+      <link>//localhost:1313/tags/claude/</link>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/claude/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>MCP</title>
+      <link>//localhost:1313/tags/mcp/</link>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/mcp/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>ADCS</title>
+      <link>//localhost:1313/tags/adcs/</link>
+      <pubDate>Tue, 30 Jun 2026 01:08:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/adcs/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>ESC8</title>
+      <link>//localhost:1313/tags/esc8/</link>
+      <pubDate>Tue, 30 Jun 2026 01:08:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/esc8/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Kerberos Relay</title>
+      <link>//localhost:1313/tags/kerberos-relay/</link>
+      <pubDate>Tue, 30 Jun 2026 01:08:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/kerberos-relay/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>KrbRelay</title>
+      <link>//localhost:1313/tags/krbrelay/</link>
+      <pubDate>Tue, 30 Jun 2026 01:08:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/krbrelay/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Privilege Escalation</title>
+      <link>//localhost:1313/tags/privilege-escalation/</link>
+      <pubDate>Tue, 30 Jun 2026 01:08:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/privilege-escalation/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>ESC11</title>
+      <link>//localhost:1313/tags/esc11/</link>
+      <pubDate>Sun, 28 Jun 2026 21:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/esc11/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>NTLM Relay</title>
+      <link>//localhost:1313/tags/ntlm-relay/</link>
+      <pubDate>Sun, 28 Jun 2026 21:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/ntlm-relay/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>RPC Relay</title>
+      <link>//localhost:1313/tags/rpc-relay/</link>
+      <pubDate>Sun, 28 Jun 2026 21:30:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/rpc-relay/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Child to Parent</title>
+      <link>//localhost:1313/tags/child-to-parent/</link>
+      <pubDate>Mon, 08 Jun 2026 01:00:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/child-to-parent/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Domain Trust</title>
+      <link>//localhost:1313/tags/domain-trust/</link>
+      <pubDate>Mon, 08 Jun 2026 01:00:00 -0500</pubDate>
+      <guid>//localhost:1313/tags/domain-trust/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>CRTP</title>
+      <link>//localhost:1313/tags/crtp/</link>
+      <pubDate>Fri, 13 Mar 2026 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/tags/crtp/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Pentesting</title>
+      <link>//localhost:1313/tags/pentesting/</link>
+      <pubDate>Fri, 13 Mar 2026 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/tags/pentesting/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Assembly</title>
+      <link>//localhost:1313/tags/assembly/</link>
+      <pubDate>Tue, 30 Sep 2025 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/tags/assembly/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>BOF</title>
+      <link>//localhost:1313/tags/bof/</link>
+      <pubDate>Tue, 30 Sep 2025 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/tags/bof/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Investigation</title>
+      <link>//localhost:1313/tags/investigation/</link>
+      <pubDate>Tue, 30 Sep 2025 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/tags/investigation/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>X32</title>
+      <link>//localhost:1313/tags/x32/</link>
+      <pubDate>Tue, 30 Sep 2025 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/tags/x32/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

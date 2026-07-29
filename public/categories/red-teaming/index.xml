@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Red Teaming on IamWin&#39;s Blog</title>
+    <link>//localhost:1313/categories/red-teaming/</link>
+    <description>Recent content in Red Teaming on IamWin&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 26 Jul 2026 11:30:00 -0500</lastBuildDate>
+    <atom:link href="//localhost:1313/categories/red-teaming/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dumping LSASS Without Mimikatz: Native and Administrative Alternatives</title>
+      <link>//localhost:1313/posts/dumpinglsass/</link>
+      <pubDate>Sun, 26 Jul 2026 11:30:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/dumpinglsass/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the field of offensive security and Red Teaming, memory credential access remains one of the most common vectors for achieving lateral movement within a Windows environment. Historically, &lt;strong&gt;Mimikatz&lt;/strong&gt; (developed by Benjamin Delpy) has been the go-to tool for extracting credentials from the &lt;strong&gt;LSASS&lt;/strong&gt; (Local Security Authority Subsystem Service) process.&lt;/p&gt;
+&lt;p&gt;However, in modern enterprise environments, Mimikatz signatures are heavily detected by antivirus solutions, Windows Defender, and EDRs. To understand how these activities are protected and detected, it is essential to understand how LSASS memory dumps can be performed using native operating system tools (LOLBins) or legitimate administrative utilities, avoiding the use of well-known offensive tools.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>BloodHound MCP: Integrating Claude with BloodHound</title>
+      <link>//localhost:1313/posts/mcpbloodhoundwithclaude/</link>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/mcpbloodhoundwithclaude/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;About 2 weeks ago I found out about the existence of an MCP (Model Context Protocol) server for BloodHound that allows us to integrate it with Claude. Below I share the publications I read on the topic:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;SpecterOps article:&lt;/strong&gt;
+&lt;a href=&#34;https://specterops.io/blog/2026/06/18/bloodhound-mcp-one-year-later-what-i-learned-about-mcps-models-and-context/#h-introduction-the-first-version-worked-but-needed-improvement&#34;&gt;BloodHound MCP: One Year Later — What I Learned About MCPs, Models, and Context&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;GitHub Repository:&lt;/strong&gt;
+&lt;a href=&#34;https://github.com/mwnickerson/bloodhound_mcp&#34;&gt;BloodHound MCP - GitHub Repository&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;what-is-this&#34;&gt;What is this?&lt;/h3&gt;
+&lt;p&gt;The BloodHound MCP allows you to query your Active Directory data in natural language directly from Claude Desktop. Instead of writing Cypher queries manually, you ask Claude things like &amp;ldquo;show me all Domain Admins&amp;rdquo; or &amp;ldquo;find kerberoastable users.&amp;rdquo;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Active Directory Certificate Services: Abusing ADCS ESC8 (Kerberos Relay)</title>
+      <link>//localhost:1313/posts/esc8_krb/</link>
+      <pubDate>Tue, 30 Jun 2026 01:08:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/esc8_krb/</guid>
+      <description>&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;ESC8&lt;/strong&gt; is an AD CS vulnerability where the Certificate Enrollment Web Service is enabled over &lt;strong&gt;HTTP&lt;/strong&gt; (without HTTPS). This allows intercepting a Domain Controller&amp;rsquo;s authentication and relaying it to the CA to request a certificate. With that certificate we can impersonate the DC, perform DCSync, and take full control of the domain.&lt;/p&gt;
+&lt;h2 id=&#34;requirements&#34;&gt;Requirements&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Valid domain user credentials (&lt;code&gt;Rosie.Powell:Cicada123&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;The CA has Web Enrollment over HTTP enabled&lt;/li&gt;
+&lt;li&gt;NTLM disabled in the domain (authentication must use Kerberos)&lt;/li&gt;
+&lt;li&gt;Machine Account Quota &amp;gt; 0 (allows adding DNS records, default is 10)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;step-by-step-walkthrough&#34;&gt;Step-by-step Walkthrough&lt;/h2&gt;
+&lt;h3 id=&#34;1-initial-setup&#34;&gt;1. Initial Setup&lt;/h3&gt;
+&lt;p&gt;Ensure correct DNS resolution in &lt;code&gt;/etc/hosts&lt;/code&gt;:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)</title>
+      <link>//localhost:1313/posts/esc11/</link>
+      <pubDate>Sun, 28 Jun 2026 21:30:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/esc11/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;ESC11&lt;/strong&gt; is a vulnerability in &lt;strong&gt;Active Directory Certificate Services (ADCS)&lt;/strong&gt; that occurs when the RPC interface of the Certificate Authority (CA) — specifically the &lt;strong&gt;ICertPassage (MS-ICPR)&lt;/strong&gt; interface — does not enforce signing or encryption for certificate enrollment requests. This happens because the &lt;code&gt;IF_ENFORCEENCRYPTICERTREQUEST&lt;/code&gt; flag is disabled on the CA.&lt;/p&gt;
+&lt;p&gt;Since no packet signing or encryption is required on this RPC interface, it becomes vulnerable to &lt;strong&gt;NTLM Relay&lt;/strong&gt; attacks. If an attacker manages to coerce the NTLM authentication of a privileged account (such as the machine account of a Domain Controller or a Domain Admin), they can relay that authentication to the CA&amp;rsquo;s RPC port and request a valid certificate on behalf of the victim.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Active Directory Certificate Services: Abusing ADCS ESC8 (NTLM Relay)</title>
+      <link>//localhost:1313/posts/esc8/</link>
+      <pubDate>Tue, 09 Jun 2026 03:00:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/esc8/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;ESC8&lt;/strong&gt; is a vulnerability in &lt;strong&gt;Active Directory Certificate Services (ADCS)&lt;/strong&gt; that occurs when the &lt;strong&gt;Web Enrollment&lt;/strong&gt; service is enabled over HTTP without encryption, or over HTTPS without &lt;strong&gt;Channel Binding (EPA)&lt;/strong&gt; enabled.&lt;/p&gt;
+&lt;p&gt;The vulnerable endpoint is:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;http://&amp;lt;CA&amp;gt;/certsrv/certfnsh.asp
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This endpoint accepts &lt;strong&gt;NTLM authentication without signing or channel binding&lt;/strong&gt;, making it susceptible to &lt;strong&gt;NTLM Relay&lt;/strong&gt; attacks. In essence, an attacker can intercept the NTLM authentication of a privileged account (such as the Domain Controller&amp;rsquo;s machine account) and relay it to the ADCS service to obtain a valid certificate on behalf of that account.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Active Directory Domain Trust: Abusing Child-to-Parent Trust</title>
+      <link>//localhost:1313/posts/trustad/</link>
+      <pubDate>Mon, 08 Jun 2026 01:00:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/trustad/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;&lt;strong&gt;INTRODUCTION&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Domain Trust relationships in Active Directory are fundamental to allowing users from one domain to access resources in other domains. However, from a Red Teaming perspective, these relationships represent an excellent vector for privilege escalation and lateral movement.&lt;/p&gt;
+&lt;p&gt;In this post, we will explore how to abuse a &lt;strong&gt;Child-to-Parent&lt;/strong&gt; trust relationship within the same forest to escalate privileges from a fully compromised subdomain to the root domain.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;key-concepts&#34;&gt;&lt;strong&gt;KEY CONCEPTS&lt;/strong&gt;&lt;/h2&gt;
+&lt;h3 id=&#34;what-is-a-domain-trust&#34;&gt;&lt;strong&gt;What is a Domain Trust?&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;It is a trust mechanism between two domains that enables cross-domain authentication. Its key properties are:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Mi Experiencia con la CRTP - 2026</title>
+      <link>//localhost:1313/posts/experienciecrtp-es/</link>
+      <pubDate>Fri, 13 Mar 2026 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/posts/experienciecrtp-es/</guid>
+      <description>&lt;h2 id=&#34;anécdota&#34;&gt;&lt;strong&gt;ANÉCDOTA&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Hace como un año, estaba en el séptimo ciclo de Ingeniería de Sistemas sintiéndome en un callejón sin salida. Con el título cada vez más cerca, ni siquiera tenía un currículum definido; si bien es cierto que había realizado muchos proyectos de software y gestión, honestamente, no me llenaban. Había tenido un primer roce con la Seguridad Informática y Linux en un curso de la facultad y me había enganchado, pero en ese momento lo veía más como un sueño lejano que como una carrera real.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>My Experience with the CRTP - 2026</title>
+      <link>//localhost:1313/posts/experienciecrtp-en/</link>
+      <pubDate>Fri, 13 Mar 2026 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/posts/experienciecrtp-en/</guid>
+      <description>&lt;h2 id=&#34;anecdote&#34;&gt;&lt;strong&gt;ANECDOTE&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;About a year ago, I was in my seventh semester of Systems Engineering, feeling like I was at a dead end. With graduation getting closer every day, I didn&amp;rsquo;t even have a defined resume. While it&amp;rsquo;s true I had completed many software and management projects, honestly, they didn&amp;rsquo;t fulfill me. I&amp;rsquo;d had a first encounter with Information Security and Linux in a faculty course and got hooked, but at that time, I saw it more as a distant dream than a real career path.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

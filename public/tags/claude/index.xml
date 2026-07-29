@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Claude on IamWin&#39;s Blog</title>
+    <link>//localhost:1313/tags/claude/</link>
+    <description>Recent content in Claude on IamWin&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 03 Jul 2026 12:00:00 -0500</lastBuildDate>
+    <atom:link href="//localhost:1313/tags/claude/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>BloodHound MCP: Integrating Claude with BloodHound</title>
+      <link>//localhost:1313/posts/mcpbloodhoundwithclaude/</link>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/mcpbloodhoundwithclaude/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;About 2 weeks ago I found out about the existence of an MCP (Model Context Protocol) server for BloodHound that allows us to integrate it with Claude. Below I share the publications I read on the topic:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;SpecterOps article:&lt;/strong&gt;
+&lt;a href=&#34;https://specterops.io/blog/2026/06/18/bloodhound-mcp-one-year-later-what-i-learned-about-mcps-models-and-context/#h-introduction-the-first-version-worked-but-needed-improvement&#34;&gt;BloodHound MCP: One Year Later — What I Learned About MCPs, Models, and Context&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;GitHub Repository:&lt;/strong&gt;
+&lt;a href=&#34;https://github.com/mwnickerson/bloodhound_mcp&#34;&gt;BloodHound MCP - GitHub Repository&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;what-is-this&#34;&gt;What is this?&lt;/h3&gt;
+&lt;p&gt;The BloodHound MCP allows you to query your Active Directory data in natural language directly from Claude Desktop. Instead of writing Cypher queries manually, you ask Claude things like &amp;ldquo;show me all Domain Admins&amp;rdquo; or &amp;ldquo;find kerberoastable users.&amp;rdquo;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

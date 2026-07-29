@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>LSASS on IamWin&#39;s Blog</title>
+    <link>//localhost:1313/tags/lsass/</link>
+    <description>Recent content in LSASS on IamWin&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 26 Jul 2026 11:30:00 -0500</lastBuildDate>
+    <atom:link href="//localhost:1313/tags/lsass/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dumping LSASS Without Mimikatz: Native and Administrative Alternatives</title>
+      <link>//localhost:1313/posts/dumpinglsass/</link>
+      <pubDate>Sun, 26 Jul 2026 11:30:00 -0500</pubDate>
+      <guid>//localhost:1313/posts/dumpinglsass/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the field of offensive security and Red Teaming, memory credential access remains one of the most common vectors for achieving lateral movement within a Windows environment. Historically, &lt;strong&gt;Mimikatz&lt;/strong&gt; (developed by Benjamin Delpy) has been the go-to tool for extracting credentials from the &lt;strong&gt;LSASS&lt;/strong&gt; (Local Security Authority Subsystem Service) process.&lt;/p&gt;
+&lt;p&gt;However, in modern enterprise environments, Mimikatz signatures are heavily detected by antivirus solutions, Windows Defender, and EDRs. To understand how these activities are protected and detected, it is essential to understand how LSASS memory dumps can be performed using native operating system tools (LOLBins) or legitimate administrative utilities, avoiding the use of well-known offensive tools.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

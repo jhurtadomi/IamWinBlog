@@ -1,0 +1,63 @@
+baseURL = '/'
+locale = 'en-us'
+title = "IamWin's Blog"
+
+[module]
+  [[module.imports]]
+    path = "github.com/adityatelange/hugo-PaperMod"
+
+[params]
+  env = "production"
+  title = "Home"
+  description = "Cybersecurity, Pentesting & Red Teaming Journey"
+  author = "Jean aka IamWin"
+  favicon = "/favicon.ico"
+
+  [params.label]
+    text = "Home"
+
+  # Profile Mode
+  [params.profileMode]
+    enabled = false
+
+  [params.homeInfoParams]
+    Title = "Hey, I'm Jean, aka Wintxx / IamWin"
+    Content = "Systems Engineering student passionate about cybersecurity, pentesting, and red teaming. I share my machine writeups, certification exam experiences, research, tool articles, and more."
+
+  # Social Icons
+  [[params.socialIcons]]
+    name = "linkedin"
+    url = "https://www.linkedin.com/in/jean-hurtado-8741a42a5"
+
+  [[params.socialIcons]]
+    name = "hackthebox"
+    url = "https://app.hackthebox.com/profile/1942692"
+
+  [[params.socialIcons]]
+    name = "twitter"
+    url = "https://twitter.com/winterxd99"
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/jhurtadomi"
+
+[[menu.main]]
+  name = "Tags"
+  url = "/tags/"
+  weight = 10
+
+[[menu.main]]
+  name = "Categories"
+  url = "/categories/"
+  weight = 20
+
+[[menu.main]]
+  name = "About"
+  url = "/about/"
+  weight = 30
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+

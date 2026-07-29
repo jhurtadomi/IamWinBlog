@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>CRTP on IamWin&#39;s Blog</title>
+    <link>//localhost:1313/tags/crtp/</link>
+    <description>Recent content in CRTP on IamWin&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 13 Mar 2026 10:00:00 +0000</lastBuildDate>
+    <atom:link href="//localhost:1313/tags/crtp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Mi Experiencia con la CRTP - 2026</title>
+      <link>//localhost:1313/posts/experienciecrtp-es/</link>
+      <pubDate>Fri, 13 Mar 2026 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/posts/experienciecrtp-es/</guid>
+      <description>&lt;h2 id=&#34;anécdota&#34;&gt;&lt;strong&gt;ANÉCDOTA&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Hace como un año, estaba en el séptimo ciclo de Ingeniería de Sistemas sintiéndome en un callejón sin salida. Con el título cada vez más cerca, ni siquiera tenía un currículum definido; si bien es cierto que había realizado muchos proyectos de software y gestión, honestamente, no me llenaban. Había tenido un primer roce con la Seguridad Informática y Linux en un curso de la facultad y me había enganchado, pero en ese momento lo veía más como un sueño lejano que como una carrera real.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>My Experience with the CRTP - 2026</title>
+      <link>//localhost:1313/posts/experienciecrtp-en/</link>
+      <pubDate>Fri, 13 Mar 2026 10:00:00 +0000</pubDate>
+      <guid>//localhost:1313/posts/experienciecrtp-en/</guid>
+      <description>&lt;h2 id=&#34;anecdote&#34;&gt;&lt;strong&gt;ANECDOTE&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;About a year ago, I was in my seventh semester of Systems Engineering, feeling like I was at a dead end. With graduation getting closer every day, I didn&amp;rsquo;t even have a defined resume. While it&amp;rsquo;s true I had completed many software and management projects, honestly, they didn&amp;rsquo;t fulfill me. I&amp;rsquo;d had a first encounter with Information Security and Linux in a faculty course and got hooked, but at that time, I saw it more as a distant dream than a real career path.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

