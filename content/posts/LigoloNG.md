@@ -1,7 +1,6 @@
 ---
 title: "Ligolo-NG: Pivoting Guide for CPTS"
 date: 2026-08-08 22:30:50 -0500
-draft: true
 categories: [Red Teaming, Pivoting]
 tags: [Ligolo-NG, Pivoting, CPTS, Tunneling]
 ShowToc: true
