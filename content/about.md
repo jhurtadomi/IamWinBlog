@@ -25,11 +25,11 @@ When I'm not studying, you'll probably find me:
 
 I hold the following technical certifications:
 
+* **Hack The Box:** CPTS
 * **Altered Security:** CRTP
 * **INE:** eJPT
 * **The Sec Ops Group:** C-ADPenX, CAPenX, CRTeamer, C-APIPen
-* **CyberWarfareLabs:** CRTA, MCRTA, CRT-ID, ADRTS
-* **SkillsFront:** ISO 27001:2022 Associate
+* **CyberWarfareLabs:** CRTA
 
 ## What will you find here?
 
