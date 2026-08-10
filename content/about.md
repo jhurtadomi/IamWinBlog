@@ -23,13 +23,13 @@ When I'm not studying, you'll probably find me:
 
 ## Certifications
 
-I hold the following technical certifications:
+Presented in no particular order.
 
-* **Hack The Box:** CPTS
-* **Altered Security:** CRTP
-* **INE:** eJPT
-* **The Sec Ops Group:** C-ADPenX, CAPenX, CRTeamer, C-APIPen
-* **CyberWarfareLabs:** CRTA
+- Hack The Box Certified Penetration Testing Specialist (CPTS)
+- Altered Security Certified Red Team Professional (CRTP)
+- INE Security eLearn Junior Pentester (eJPT)
+- The SecOps Group Certified Active Directory Penetration Expert (C-ADPenX)
+- CyberWarfareLabs Certified Red Team Analyst (CRTA)
 
 ## What will you find here?
 
