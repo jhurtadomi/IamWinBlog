@@ -9,7 +9,7 @@ cover:
   image: /assets/img/LigoloNG/portada.png
 ---
 
-# Introduction
+## Introduction
 
 This guide covers the pivoting process using Ligolo-NG, with a focus on assessment environments such as the CPTS (Certified Penetration Testing Specialist). The objective is to provide a clear, structured technical reference that enables the reader to understand and replicate the configuration of multiple pivot hops across segmented networks.
 
@@ -18,7 +18,7 @@ The infrastructure used throughout this guide has the following topology:
 ![infra](/assets/img/LigoloNG/infra.png)
 
 
-# Setting Up the Ligolo-NG Proxy
+## Setting Up the Ligolo-NG Proxy
 
 The first step is to start the Ligolo-NG proxy component on the attacker machine. This requires having the proxy and agent binaries available beforehand. Both can be obtained from the official repository:
 
@@ -43,7 +43,7 @@ To start the proxy using a self-signed certificate, run the following command:
 
 > **Important note:** It is strongly recommended to run the proxy with administrator (`root`) privileges, as Ligolo-NG needs to create virtual network interfaces during the routing process — an operation that requires elevated permissions.
 
-# First Pivot
+## First Pivot
 
 At this point, it is assumed that the initial foothold machine (`10.10.10.2`) has been compromised with `root` privileges. After enumerating the system's network interfaces, an internal network (`20.20.20.0/24`) is identified that cannot be reached directly from the attacker machine.
 
@@ -67,7 +67,7 @@ To establish connectivity with that network, the Ligolo-NG agent is transferred 
 
 Once the agent is executed, the compromised machine establishes a connection to the proxy and is registered as an active session.
 
-## Autoroute
+### Autoroute
 
 Ligolo-NG includes the `autoroute` feature, which automates the creation of the virtual network interface and the routing configuration toward the target network — all from within the proxy console. The procedure is as follows:
 
@@ -121,7 +121,7 @@ Connectivity to the internal network can be validated using a ping sweep:
 
 Routing is functioning correctly. However, in deep pivoting scenarios, additional questions arise: what happens if the next compromised machine also exposes internal networks? How is the agent transferred to deeper network segments? How are reverse shells received from hosts located in internal networks? To address these use cases, Ligolo-NG provides the **Listeners** functionality.
 
-## Listeners
+### Listeners
 
 Listeners allow the agent to act as a traffic relay: they expose a port on the compromised machine and transparently forward incoming connections to a local port on the attacker machine through the established tunnel.
 
@@ -153,7 +153,7 @@ INFO[1864] Listener 2 created on remote agent!
 
 With this configuration, the first pivot is fully established and the environment is ready to proceed to the second hop.
 
-# Second Pivot
+## Second Pivot
 
 Assuming that host `20.20.20.3` has been compromised, the next step is to enumerate its network interfaces:
 
@@ -221,7 +221,7 @@ INFO[3366] Listener 2 created on remote agent!
 
 ![ligolo](/assets/img/LigoloNG/image14.png)
 
-# Third Pivot
+## Third Pivot
 
 After compromising a host on the `30.30.30.0/24` segment, the network is enumerated again and another internal segment (`40.40.40.0/24`) is discovered:
 
@@ -270,7 +270,7 @@ INFO[4018] Listener 1 created on remote agent!
 INFO[4020] Listener 2 created on remote agent!        
 ```
 
-## Receiving a Reverse Shell from a Deep Network
+### Receiving a Reverse Shell from a Deep Network
 
 Assume that a webshell has been identified on host `40.40.40.3`. The goal is to obtain an interactive session via a reverse shell. Since this host resides in a deeply nested network segment, establishing a direct connection to the attacker machine is not possible.
 
