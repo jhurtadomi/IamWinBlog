@@ -1,5 +1,5 @@
 ---
-title: "Infiltrator — HackTheBox Writeup: Active Directory, Output Messenger & ADCS ESC4 Exploitation"
+title: "Infiltrator — HackTheBox"
 date: 2026-09-05 01:12:12 -0500
 categories: [Writeups, HackTheBox, Active Directory]
 tags: [HackTheBox, Infiltrator, Active Directory, AS-REP Roasting, BloodHound, Output Messenger, Reverse Engineering, BitLocker, GMSA, ADCS, ESC4]
