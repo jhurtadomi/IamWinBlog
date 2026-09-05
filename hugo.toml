@@ -10,7 +10,7 @@ title = "IamWin's Blog"
   env = "production"
   title = "Home"
   description = "Cybersecurity, Pentesting & Red Teaming Journey"
-  author = "Jean aka IamWin"
+  author = "Jean aka Wintxx"
   favicon = "/favicon.ico"
 
   [params.label]
