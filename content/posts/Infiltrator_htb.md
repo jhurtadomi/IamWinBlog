@@ -549,7 +549,16 @@ Logging into Output Messenger as `m.harris` reveals a direct conversation with `
 
 ![Admin Chat with UserExplorer.exe](/assets/img/infiltrator/om4.png)
 
-The executable is downloaded for static analysis in **dnSpy**:
+When attempting to download the attachment from the Linux client, the transfer may fail or result in a 0-byte file. To resolve this, `socat` is used to expose the internal ports forwarded through the Ligolo-NG tunnel to an external interface (`192.168.59.171`), allowing an alternative Windows client machine to connect to the Output Messenger server:
+
+```sh
+┌──(iamwin㉿0xWin)-[~/Downloads]
+└─$ for port in {14121..14126}; do socat TCP-LISTEN:$port,bind=192.168.59.171,fork,reuseaddr TCP:240.0.0.1:$port & done
+```
+
+By connecting with the official Windows client from the secondary Windows machine, the file transfer succeeds and the binary is downloaded:
+
+> https://www.outputmessenger.com/lan-messenger-downloads/
 
 ![Download UserExplorer.exe](/assets/img/infiltrator/om5.png)
 
